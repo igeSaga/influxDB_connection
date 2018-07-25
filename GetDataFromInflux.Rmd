@@ -1,0 +1,43 @@
+---
+title: "Read InfluxDB with R"
+author: "Curdin Derungs"
+date: "25/07/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#install.packages("remotes")
+#remotes::install_github("dleutnant/influxdbr@dev")
+
+library(influxdbr)
+```
+
+## DB Connection
+
+```{r con}
+con<-influx_connection(host = "10.180.26.130")
+show_databases(con = con)
+```
+
+## Query DB
+
+```{r query, message=FALSE, warning=FALSE}
+
+result <- influx_query(con = con,
+                        db = "huettengraben", 
+                        query = 'select mean("currentValue") from "HK02_00_TMP_MET_AT_RT" group by time(2h) fill(previous)',
+                        simplifyList = T
+                       )
+```
+
+## Plot Timeseries
+
+```{r plot}
+plot(result)
+```
+
+## Decompose Timeseries into Trend, Seasonal Effects and Remainder
+
+```{r decomp}
+plot(decompose(ts(result, frequency=12)))
+```
